@@ -8,7 +8,7 @@ def fun(b):
 	b = b + 4
 
 if __name__ == '__main__':
-	neural_network = NeuralNetwork("/home/perica/Desktop/neural_network.txt")
+	neural_network = NeuralNetwork("/home/perica/Desktop/neural_network.txt", "/home/perica/Desktop/neural_network_res.txt")
 	# aba = " fafaf  ffa faf af affrekrej j      k5erer"
 	# aba = aba.replace(" ", "")
 	# print(aba)

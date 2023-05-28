@@ -5,15 +5,13 @@ class Neuron:
 		self.weights = []
 		self.dependent_neurons = []
 		self.bias = bias
-	
 
-	
 	# @property
 	def activate_neuron(self):
 		activation_sum = self.bias
 		for i in range(min(len(self.weights), len(self.dependent_neurons))):
 			activation_sum += self.dependent_neurons[i].activate_neuron() * self.weights[i]
-		return activation_sum
+		return Neuron.activation_function(activation_sum)
 	
 	def assign_neuron(self, neuron, index):
 		self.dependent_neurons[index] = neuron
@@ -21,6 +19,7 @@ class Neuron:
 	def append_dependent_neuron(self, neuron):
 		self.dependent_neurons.append(neuron)
 	
+	@staticmethod
 	def activation_function(z):
 		return 1 / (1 + math.exp(-z))
 	
@@ -33,10 +32,3 @@ class Neuron:
 	def assign_weight(self, weight, index):
 		if index < len(self.weights):
 			self.weights[index] = weight
-	
-	#write me a method which returns hello world as a result
-	# def activation_function(self):
-	# 	return "Hello world"
-
-#write me a quicksort algorithm
-# def quicksort(array):

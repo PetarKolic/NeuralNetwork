@@ -11,11 +11,6 @@ class NeuralNetwork:
 		tmp_weights = hf.find_between(line, "[", "]")
 		line = line.partition(tmp_weights)[2]
 		tmp_weights = list(map(float, tmp_weights.split(",")))
-		neuron = None
-		# if len(self.layers) == 1:
-		# 	neuron = FirstLayerNeuron(tmp_weights[0])
-		# else:
-		# 	neuron = Neuron(tmp_weights[0])
 		neuron = Neuron(tmp_weights[0])
 		layer.append_neuron(neuron)
 		for i in range(1, len(tmp_weights)):
@@ -26,14 +21,11 @@ class NeuralNetwork:
 				neuron.append_dependent_neuron(neuron_dependent)
 		return line
 	
-	def __init__(self, filename):
-		self.layers = []
-		with open(filename, 'r') as f:
+	def parse_file_tmp_weights(self, file_tmp_weights):
+		with open(file_tmp_weights, 'r') as f:
 			# num_input_parameters = int(f.readline())		#number, exception handling missing
 			line = f.readline()
-			# self.first_layer_manipulation(line)
 			
-			# line = f.readline()
 			while line != '':  # line of code
 				line = line.replace(" ", "").replace("\t", "").replace("\n", "")
 				layer = Layer()
@@ -41,6 +33,10 @@ class NeuralNetwork:
 				while len(line) > 1:  # maybe 1 is better to be checked
 					line = self.line_parsing_neuron_layer(line, layer)
 				line = f.readline()
+	def __init__(self, file_tmp_weights, file_tmp_test_data):
+		
+		self.layers = []
+		self.parse_file_tmp_weights(file_tmp_weights)
 	
 	# print(self.layers)
 	
