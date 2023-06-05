@@ -3,13 +3,14 @@ from neuron import Neuron
 
 class FirstLayerNeuron(Neuron):
 	
-	def __init__(self, bias):
-		super().__init__(bias)
+	def __init__(self, value):
+		super().__init__(value)
+		self.value = value
 		
-	@property
-	def activation_function2(self):
-		# return self.bias
-		return self.bias
+	# @property
+	# def activate_neuron(self):
+	# 	# return self.bias
+	# 	return self.value
 	
 	def assign_neuron(self, neuron, index):
 		pass
