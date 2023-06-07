@@ -12,7 +12,7 @@ class NeuralNetwork:
 	
 	@staticmethod
 	def error_calc(result, actual_res):
-		return -(1 - actual_res) * math.log(result) - actual_res * math.log(1 - result)
+		return -(actual_res * math.log(result)) - (1 - actual_res) * math.log(1 - result)
 	def line_parsing_neuron_layer(self, line, layer):
 		
 		tmp_weights = hf.find_between(line, "[", "]")
@@ -147,7 +147,7 @@ class NeuralNetwork:
 				self.calculate_neuron_error_non_last_layer(neuron, j, self.layers[i+1])
 		
 	def update_weights(self):
-		for layer in self.layers:
+		for layer in self.layers[1:]:
 			for neuron in layer.neurons:
 				for i in range(len(neuron.weights)):
 					neuron.update_weights(4, 0.1, 0.1, layer)
