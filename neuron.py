@@ -10,19 +10,44 @@ class Neuron:
 		# self.activation = 0
 		self.error = 0
 		self.delta = 0
+		self.z = 0
+		self.activation = 0
+	
+	
+	def get_activation(self):
+		return self.activation_function(self.z)
+
+	
+
+	def update_z(self):
+		self.z = 0
+		for i in range(len(self.dependent_neurons)):
+			self.z += self.dependent_neurons[i].get_activation() * self.weights[i]
+	
+	def update_a(self):
+		self.a = self.get_activation()
+	
+
+	def get_z(self):
+		self.update_z()
+		return self.z
 	
 	# @property
-	def activate_neuron(self):
-		activation_sum = self.bias
-		for i in range(min(len(self.weights), len(self.dependent_neurons))):
-			
-			activation_neuron = 0
-			
-			neuron = self.dependent_neurons[i]
-			if (isinstance(self.dependent_neurons[i], Neuron)):
-				activation_neuron = neuron.activate_neuron()
-			activation_sum += activation_neuron * self.weights[i]
-		return Neuron.activation_function(activation_sum)
+	# def activate_neuron(self):
+	# 	activation_sum = self.bias
+	# 	for i in range(min(len(self.weights), len(self.dependent_neurons))):
+	#
+	# 		activation_neuron = 0
+	#
+	# 		neuron = self.dependent_neurons[i]
+	# 		if (isinstance(self.dependent_neurons[i], Neuron)):
+	# 			activation_neuron = neuron.activate_neuron()
+	# 		activation_sum += activation_neuron * self.weights[i]
+	# 		self.z = activation_sum
+	# 		self.activation = Neuron.activation_function(activation_sum)
+	# 	return Neuron.activation_function(activation_sum)
+	
+
 	
 	def assign_neuron(self, neuron, index):
 		self.dependent_neurons[index] = neuron
@@ -56,7 +81,7 @@ class Neuron:
 	def update_weights(self, m, lambda_const, gradient_const, layer):
 		
 		for neuron in layer.neurons:
-			self.update_delta(neuron.activate_neuron())
+			self.update_delta(neuron.get_activation())
 		
 		for i in range(len(self.weights)):
 			dD = 1 / m * self.delta + lambda_const * self.weights[i]

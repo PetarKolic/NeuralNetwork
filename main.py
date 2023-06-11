@@ -30,12 +30,16 @@ if __name__ == '__main__':
 	#
 	# 	neural_network.update_weights()
 
-	for i in range(1000):
-		list_result = neural_network.activate_network()
+	# list_result = neural_network.activate_network()
+
+	# for i in range(1000):
+	# 	list_result = neural_network.activate_network()
+	# 	neural_network.backward_propagation()
+	# 	neural_network.update_weights()
+	
+	for i in range(100):
+		neural_network.activate_network()
 		neural_network.backward_propagation()
 		neural_network.update_weights()
-
-
-
 
 	print("sve ok")

@@ -1,39 +1,31 @@
 import helper_fun as hf
 from neuron import Neuron
-# from first_layer_neuron import FirstLayerNeuron
-# import layer as la
 from layer import Layer
 from first_layer_neuron import FirstLayerNeuron
 
 import math
 import ast
 
+
 class NeuralNetwork:
 	
 	@staticmethod
 	def error_calc(result, actual_res):
 		return -(actual_res * math.log(result)) - (1 - actual_res) * math.log(1 - result)
+	
 	def line_parsing_neuron_layer(self, line, layer):
 		
 		tmp_weights = hf.find_between(line, "[", "]")
 		line = line.partition(tmp_weights)[2]
 		tmp_weights = list(map(float, tmp_weights.split(",")))
-		neuron = None
-		# if len(self.layers) == 1:
-		# 	neuron = FirstLayerNeuron(tmp_weights[0])
-		# else:
-		# 	neuron = Neuron(tmp_weights[0])
 		neuron = Neuron(tmp_weights[0])
 		for i in range(1, len(tmp_weights)):
 			neuron.append_weight(tmp_weights[i])
 		
 		layer.append_neuron(neuron)
-		for i in range(1, len(tmp_weights)):
-			# print(i)
-			# neuron.append_weight(tmp_weights[i])
-			if (len(self.layers) > 1):
-				for neuron_dependent in self.layers[-2].neurons:
-					neuron.append_dependent_neuron(neuron_dependent)
+		if (len(self.layers) > 1):
+			for neuron_dependent in self.layers[-2].neurons:
+				neuron.append_dependent_neuron(neuron_dependent)
 		return line
 	
 	def parse_input_output_data_set(self, line):
@@ -53,8 +45,7 @@ class NeuralNetwork:
 			line = f.readline()
 			
 			while line != '':  # line of code
-				# layer = Layer()
-				# self.layers.append(layer)\
+
 				self.parse_input_output_data_set(line)
 				line = f.readline()
 	
@@ -74,6 +65,7 @@ class NeuralNetwork:
 	
 	def __init__(self, file_tmp_weights, file_input_output_data):
 		
+		self.total_error = None
 		self.layers = []
 		self.inputDataSets = []
 		self.outputDataSets = []
@@ -99,14 +91,14 @@ class NeuralNetwork:
 		else:
 			return False
 	
-
-	def final_error_formula(self,result_list, i, j):
+	def final_error_formula(self, result_list, i, j):
 		result = result_list[i][j]
 		actual_res = self.outputDataSets[i][j]
 		if result <= 0:
 			return float('NaN')  # Return NaN for non-positive numbers
 		else:
 			return self.error_calc(result, actual_res)
+	
 	def calculate_error(self, result_list):
 		
 		total_error = 0
@@ -115,28 +107,28 @@ class NeuralNetwork:
 				total_error += self.final_error_formula(result_list, i, j)
 		return total_error
 	
-
 	def calculate_error_last_layer(self):
 		
+		output_num = len(self.layers[-1].neurons)
 		# for i  in range(self.outputDataSets):
-		for i in range(len(self.layers[-1].neurons)):
+		for i in range(output_num):
 			neuron = self.layers[-1].neurons[i]
 			error = 0
 			for j in range(len(self.outputDataSets)):
-				activation = neuron.activate_neuron()
+				activation = neuron.get_activation()
 				error += NeuralNetwork.error_calc(activation, self.outputDataSets[j][i])
-				neuron.set_error(error)
-			
+				neuron.set_error(error/output_num)
+	
 	def calculate_neuron_error_non_last_layer(self, neuron, neuron_index, output_layer):
 		error = 0
 		forward_neurons = output_layer.neurons
 		for i in range(len(output_layer.neurons)):
-				prvi_index = forward_neurons[i].weights[neuron_index] * forward_neurons[i].error
-				drugi_index = neuron.activate_neuron() * (1 - neuron.activate_neuron())
-				error += prvi_index + drugi_index
-				
-				
+			prvi_index = forward_neurons[i].weights[neuron_index] * forward_neurons[i].error
+			drugi_index = neuron.get_activation() * (1 - neuron.get_activation())
+			error += prvi_index + drugi_index
+		
 		neuron.set_error(error)
+	
 	def backward_propagation(self):
 		
 		self.calculate_error_last_layer()
@@ -144,47 +136,54 @@ class NeuralNetwork:
 		for i in range(len(self.layers) - 2, 0, -1):
 			for j in range(len(self.layers[i].neurons)):
 				neuron = self.layers[i].neurons[j]
-				self.calculate_neuron_error_non_last_layer(neuron, j, self.layers[i+1])
-		
+				self.calculate_neuron_error_non_last_layer(neuron, j, self.layers[i + 1])
+	
 	def update_weights(self):
 		for layer in self.layers[1:]:
 			for neuron in layer.neurons:
 				for i in range(len(neuron.weights)):
 					neuron.update_weights(4, 0.1, 0.1, layer)
-					
-				
+	
+	def update_first_layer(self, input_set):
+		layer = Layer()
+		if self.check_first_layer_filled():
+			self.layers[0] = layer
+		else:
+			self.layers.insert(0, layer)
+		
+		# self.layers[0] = layer
+		
+		for input_parameter in input_set:
+			n = FirstLayerNeuron(input_parameter)
+			layer.append_neuron(n)
+		
+		self.update_second_layer_dependent_neurons()
+	
+	def update_network(self):
+		# for i in range(1, len(self.layers)):
+		for i in range(len(self.layers)):
+			for j in range(len(self.layers[i].neurons)):
+				self.layers[i].neurons[j].update_z()
+				self.layers[i].neurons[j].update_a()
 	
 	def activate_network(self):
 		result_list = []
-		# for neuron in self.layers[-1].neurons:
-		# 	res = neuron.activation_function2()
-		# 	result_list.append(res)
 		result_matrix = []
 		for input_set in self.inputDataSets:
-			
-			layer = Layer()
-			if self.check_first_layer_filled():
-				self.layers[0] = layer
-			else:
-				self.layers.insert(0, layer)
-			
-			# self.layers[0] = layer
-			
-			for input_parameter in input_set:
-				n = FirstLayerNeuron(input_parameter)
-				layer.append_neuron(n)
-			
-			self.update_second_layer_dependent_neurons()
-			
+			self.update_first_layer(input_set)
+			self.update_network()
 			
 			exit_num = len(self.layers[-1].neurons)
 			for i in range(exit_num):
 				neuron = self.layers[-1].neurons[i]
-				res = neuron.activate_neuron()
+				res = neuron.get_activation()
 				result_list.append(res)
-			# print(result_list)
+			print("result:")
+			print(result_list)
 			result_matrix.append(result_list)
-
+			
 			result_list = []
-		total_error = self.calculate_error(result_matrix)
-		return print(total_error)
+		self.total_error = self.calculate_error(result_matrix) / len(self.inputDataSets)
+		return print(self.total_error)
+	
+	

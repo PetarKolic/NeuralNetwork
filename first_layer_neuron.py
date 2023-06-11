@@ -12,6 +12,18 @@ class FirstLayerNeuron(Neuron):
 	# 	# return self.bias
 	# 	return self.value
 	
+	def get_activation(self):
+		return self.z
+	
+	def get_z(self):
+		return self.value
+	
+	def update_z(self):
+		self.z = self.value
+	
+	def	activate_neuron(self):
+		return self.activation_function(self.value)
+	
 	def assign_neuron(self, neuron, index):
 		pass
 	
